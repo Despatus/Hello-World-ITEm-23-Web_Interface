@@ -1,43 +1,59 @@
-import './App.css'; // Presumably, this file contains some base styles for your app.
-import Menu from "./components/menu/Menu";
-import ShopCard from './components/shopcard/ShopCard';
-import './components/shopcard/ShopcardStyles.css'; // Import the new styles
+import React, { useState } from 'react';
+import './App.css'; // Base styles for your app
+import Menu from "./components/menu/Menu"; // Assuming this is a navigation menu component
+import ShopCard from './components/shopcard/ShopCard'; // ShopCard component
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
 
 function App() {
+  const [selectedCard, setSelectedCard] = useState(null); // State to track selected card
+
+  // Array of items for the ShopCard components
+  const itemsList = [
+    { id: 1, name: "In a cocktail shaker filled with ice, add vodka, blue curaçao and lemonade.",
+      description: "Blue Lagoon", imgurl: "./Product/Blue Lagoon.jpg" },
+
+    { id: 2, name: "This old fashioned cocktail recipe has a history. The earliest version of it was simply water, sugar, bitters, and booze. Over time, the water became ice, the booze became whiskey, and the drink became an old fashioned.",
+      description: "Old Fashioned", 
+      imgurl: "./Product/Old Fashioned.jpg" },
+
+    { id: 3, name: "Classic Aperol spritz meets the ultimate slushie in this incredible cocktail that blends frozen fresh orange juice with Aperol and bubbly prosecco. We are calling it now it is the drink of summer!",
+      description: "Frozen Aperol Spritz",
+      imgurl: "./Product/Frozen Aperol Spritz.jpg" },
+
+    { id: 4, name: "The Aviation is a pre-Prohibition cocktail that consists of gin, lemon juice, maraschino liqueur, and crème de violette.",
+      description: "Aviation", 
+      imgurl: "./Product/Aviation.jpg"},
+  ];
+
+  const handleCardClick = (card) => {
+    setSelectedCard(card); // Set the selected card
+  };
+
   return (
     <section className="app">
       <header className="app-header">
         <Menu />
       </header>
-      <main>
-        <section className="container">
-          <div className="row">
-            <div className="col-12 col-lg-4 card-blue"> {/* Apply the blue background */}
-              <ShopCard
-                card={{ id: 1, title: "The bouquet", description: "A shopcard for the flower shop" }}
-                otherval={"other"}
-              />
+      <main className="container"> {/* Bootstrap container for layout */}
+        <section className="row"> {/* Bootstrap row for responsive grid */}
+          {itemsList.map((item) => (
+            <div
+              key={item.id}
+              className={`col-12 col-lg-6 ${selectedCard === item ? 'bg-info' : ''}`} // Highlight if selected
+              onClick={() => handleCardClick(item)} // Click event to set selected card
+              style={{ cursor: 'pointer' }}
+            >
+              <ShopCard card={item} />
             </div>
-            <div className="col-12 col-lg-5 card-green"> {/* Apply the green background */}
-              <ShopCard
-                card={{ id: 2, title: "Everything you need", description: "A shopcard for the supermarket" }}
-                otherval={"other"}
-              />
-            </div>
-            <div className="col-12 col-lg-3 card-coral"> {/* Apply the coral background */}
-              <ShopCard
-                card={{ id: 3, title: "Hammer&Nails", description: "A shopcard for the hardware store" }}
-                otherval={"other"}
-              />
-            </div>
-            <div className="col-12 col-lg-12 card-salmon"> {/* Apply the salmon background */}
-              <ShopCard
-                card={{ id: 4, title: "Comfort", description: "A shopcard for the furniture store" }}
-                otherval={"other"}
-              />
-            </div>
-          </div>
+          ))}
         </section>
+        {selectedCard && (
+          <div className="mt-4">
+            <h2>Selected Item:</h2>
+            <p>{selectedCard.name}</p>
+            {selectedCard.imgurl && <img src={selectedCard.imgurl} alt={selectedCard.name} width="1000" />}
+          </div>
+        )}
       </main>
     </section>
   );
