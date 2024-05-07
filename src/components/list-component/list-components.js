@@ -1,54 +1,67 @@
-import React, {useState} from 'react';
-import ShopCard from "../shopcard/ShopCard";
+import React, { useState, useEffect } from 'react';
+import ShopCard from '../shopcard/ShopCard';
+
+// Define a constant for the localStorage key
+const LOCAL_STORAGE_KEY = "cartItems";
 
 const ListComponents = () => {
-    const cards = [
-    {id: 1, title: "Aviation (шт)", price: 150, imgUrl: "../../Product/Aviation.jpg", 
-   added: 0},
-    {id: 2, title: "Blue Lagoon (шт)", price: 100, imgUrl: "../../Product/Blue Lagoon.jpg", 
-   added: 0},
-    {id: 3, title: "Frozen Aperol Spritz (шт)", price: 120, imgUrl: "../../Product/Frozen Aperol Spritz.jpg", 
-   added: 0},
-    {id: 4, title: "Old Fashioned (шт)", price: 130, imgUrl: "../../Product/Old Fashioned.jpg", 
-    added: 0},
-    ];
-    const [totalItems, setTotalItems] = useState([]);
-    const totalPriceClick = (item) => {
-    console.log("totalPriceClick", cards);
-    cards.forEach((itemF, indexF) => {
-    if (itemF.id === item.id) {
-    cards[indexF].added++;
+  // Fetch items from localStorage during component initialization
+  const [totalItems, setTotalItems] = useState([]);
+
+  useEffect(() => {
+    const savedItems = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsedItems = savedItems ? JSON.parse(savedItems) : [];
+    setTotalItems(parsedItems);
+  }, []);
+
+  const addItem = (item) => {
+    const existingItem = totalItems.find((i) => i.id === item.id);
+    let updatedItems;
+    
+    if (existingItem) {
+      updatedItems = totalItems.map((i) =>
+        i.id === item.id ? { ...i, added: i.added + 1 } : i
+      );
+    } else {
+      item.added = 1;
+      updatedItems = [...totalItems, item];
     }
-    });
-    setTotalItems([...totalItems, item]);
-    }
-    const removeItem = (item) => {
-    console.log("removeItem", item);
-    }
-    return (
-    <main>
-    <section className="container my-5">
-    <div className="row">
-    <div className="col-6 col-sm-5 col-md-4 col-xl-3">
- <h3>Куплено на {totalItems.reduce((acc, item) => acc + item.price, 0)} грн.</h3>
- </div>
- </div>
- </section>
- <section className="container">
- <div className="row">
- {cards.map(item => {
- return (
- <ShopCard
- card={item}
- key={item.id}
- getItem={totalPriceClick}
- removeItem={removeItem}
- />
- );
- })}
- </div>
- </section>
- </main>
- );
+
+    setTotalItems(updatedItems);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedItems));
+  };
+
+  const removeItem = (item) => {
+    const updatedItems = totalItems.map((i) => 
+      i.id === item.id ? { ...i, added: i.added - 1 } : i
+    ).filter(i => i.added > 0);
+
+    setTotalItems(updatedItems);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedItems));
+  };
+
+  const cards = [
+    { id: 1, title: "Aviation", price: 150, imgUrl: "../../Product/Aviation.jpg" },
+    { id: 2, title: "Blue Lagoon", price: 100, imgUrl: "../../Product/Blue Lagoon.jpg" },
+    { id: 3, title: "Frozen Aperol Spritz", price: 120, imgUrl: "../../Product/Frozen Aperol Spritz.jpg" },
+    { id: 4, title: "Old Fashioned", price: 130, imgUrl: "../../Product/Old Fashioned.jpg" },
+  ];
+
+  return (
+    <div>
+      <h3>Total Price: {totalItems.reduce((acc, i) => acc + i.price * i.added, 0)} грн.</h3>
+      <div className="row">
+        {cards.map((item) => (
+          <ShopCard
+            key={item.id}
+            card={item}
+            getItem={addItem} // Updated function name
+            removeItem={removeItem}
+          />
+        ))}
+      </div>
+    </div>
+  );
 };
+
 export default ListComponents;
